@@ -17,8 +17,8 @@ public class CameraController : MonoBehaviour
         if(horizontal != 0 || vertical != 0) {
             locked = false;
             Vector3 newPosition = transform.position;
-            newPosition.x += 0.2f * horizontal;
-            newPosition.z += 0.2f * vertical;
+            newPosition.x += 1.0f * horizontal;
+            newPosition.z += 1.0f * vertical;
             transform.position = newPosition;
         }
     }
