@@ -11,13 +11,16 @@ public class GolfballController : MonoBehaviour
     public Image clubImage;
     public Sprite putter, iron;
     public TextMeshProUGUI score;
+    public TextMeshPro instructions;
+    public LineRenderer line;
     Vector2 initialMousePoint, endMousePoint;
-    int levelIndex = 1;
+    int levelIndex = 0, lastLevel = 2;
     bool putting = false, held = false;
     int strokes = 0;
 
     void Start() {
         transform.position =  startingPoints[levelIndex].position;
+        line.SetWidth(0.2f, 0.2f);
     }
     
     void Update()
@@ -34,7 +37,6 @@ public class GolfballController : MonoBehaviour
         }
         Vector3 currentVelocity = GetComponent<Rigidbody>().velocity;
         bool isSteady = (currentVelocity.magnitude < 0.7f);
-        Debug.Log(currentVelocity.magnitude);
         if (Input.GetMouseButtonDown(0) && isSteady) {
             held = true;
             initialMousePoint = Camera.main.ScreenToViewportPoint(Input.mousePosition);
@@ -57,6 +59,17 @@ public class GolfballController : MonoBehaviour
             ++strokes;
             score.text = "Strokes: " + strokes;
         }
+        if(held) {
+            Vector3 initialWorld = Camera.main.ViewportToWorldPoint(new Vector3(initialMousePoint.x, initialMousePoint.y, 5));
+            Vector3 endWorld = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 5));
+            Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            line.SetPosition(0, new Vector3(initialWorld.x, 20, initialWorld.z));
+            line.SetPosition(1, new Vector3(endWorld.x, 20, endWorld.z));
+        }
+        else {
+            line.SetPosition(0, Vector3.zero);
+            line.SetPosition(1, Vector3.zero);
+        }
     
         if(transform.position.y < -40) {
             GetComponent<Rigidbody>().velocity = Vector3.zero;
@@ -67,10 +80,21 @@ public class GolfballController : MonoBehaviour
     }
 
     public void Hole() {
-        ++levelIndex;
-        GetComponent<Rigidbody>().velocity = Vector3.zero;
-        GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-        transform.rotation = Quaternion.identity;
-        transform.position =  startingPoints[levelIndex].position;
+        if(levelIndex < lastLevel) {
+            ++levelIndex;
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
+            GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+            transform.rotation = Quaternion.identity;
+            transform.position =  startingPoints[levelIndex].position;            
+        }
+        else {
+            instructions.text = "Game complete! You had " + strokes + " strokes.";
+            strokes = 0;
+            levelIndex = 0;
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
+            GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+            transform.rotation = Quaternion.identity;
+            transform.position =  startingPoints[levelIndex].position;
+        }
     }
 }
